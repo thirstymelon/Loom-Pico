@@ -68,7 +68,7 @@ Implements
     Give RP2040.DMA_BASE + (Ch * 0x40)
 End Channel_Base
 
-Block Is_Busy Takes
+Block Is_Busy_Id Takes
     Ch : Unsigned_32
 Produces Boolean
 Declares
@@ -79,22 +79,22 @@ Implements
     End If
     Ch_Addr = Channel_Base(Ch)
     Give (RP2040.Reg_Read(Ch_Addr + 0x0C) & 0x01000000) != 0
-End Is_Busy
+End Is_Busy_Id
 
 Block Wait_Complete Takes
     Ch : Unsigned_32
 Implements
-    Loop while (Is_Busy(Ch))
+    Loop while (Is_Busy_Id(Ch))
     End Loop
 End Wait_Complete
 
-Block Wait Takes
+Block Wait_Id Takes
     Ch : Unsigned_32
 Implements
     Wait_Complete(Ch)
-End Wait
+End Wait_Id
 
-Block Abort Takes
+Block Abort_Id Takes
     Ch : Unsigned_32
 Declares
     Abort_Reg : Unsigned_32 = 0x50000444
@@ -103,7 +103,7 @@ Implements
         RP2040.Reg_Write(Abort_Reg, 1 LSL Ch)
         Wait_Complete(Ch)
     End If
-End Abort
+End Abort_Id
 
 Block Transmit Takes
     Ch : Unsigned_32
@@ -200,3 +200,42 @@ Implements
         End If
     End If
 End Chain
+
+Tagged Record Dma_Chan
+    Id : Unsigned_32
+End Dma_Chan
+
+Block Is_Busy Takes
+    This : Dma_Chan
+Produces Boolean
+Implements
+    Give Is_Busy_Id(This.Id)
+End Is_Busy
+
+Block Abort Takes
+    This : Dma_Chan
+Implements
+    Abort_Id(This.Id)
+End Abort
+
+Block Wait Takes
+    This : Dma_Chan
+Implements
+    Wait_Id(This.Id)
+End Wait
+
+Block Global
+    Declares
+        Ch0  : Constant Dma_Chan = Dma_Chan { Id : 0 }
+        Ch1  : Constant Dma_Chan = Dma_Chan { Id : 1 }
+        Ch2  : Constant Dma_Chan = Dma_Chan { Id : 2 }
+        Ch3  : Constant Dma_Chan = Dma_Chan { Id : 3 }
+        Ch4  : Constant Dma_Chan = Dma_Chan { Id : 4 }
+        Ch5  : Constant Dma_Chan = Dma_Chan { Id : 5 }
+        Ch6  : Constant Dma_Chan = Dma_Chan { Id : 6 }
+        Ch7  : Constant Dma_Chan = Dma_Chan { Id : 7 }
+        Ch8  : Constant Dma_Chan = Dma_Chan { Id : 8 }
+        Ch9  : Constant Dma_Chan = Dma_Chan { Id : 9 }
+        Ch10 : Constant Dma_Chan = Dma_Chan { Id : 10 }
+        Ch11 : Constant Dma_Chan = Dma_Chan { Id : 11 }
+End Global

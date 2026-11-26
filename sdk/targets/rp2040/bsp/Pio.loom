@@ -429,3 +429,65 @@ Implements
     Give 0
 End SM_Init_Default
 
+Tagged Record State_Machine
+    Unit : Unsigned_32
+    Sm   : Unsigned_32
+End State_Machine
+
+Block SM Takes
+    Unit : Unsigned_32
+    Sm   : Unsigned_32
+Produces State_Machine
+Declares
+    M : State_Machine
+Implements
+    M.Unit = Unit
+    M.Sm = Sm
+    Give M
+End SM
+
+Block Set_Enabled Takes
+    This    : State_Machine
+    Enabled : Boolean
+Produces Signed_32 or Pio_Error
+Implements
+    Give SM_Set_Enabled(This.Unit, This.Sm, Enabled)
+End Set_Enabled
+
+Block Set_Clkdiv Takes
+    This      : State_Machine
+    Int_Part  : Unsigned_16
+    Frac_Part : Unsigned_8
+Produces Signed_32 or Pio_Error
+Implements
+    Give SM_Set_Clkdiv(This.Unit, This.Sm, Int_Part, Frac_Part)
+End Set_Clkdiv
+
+Block Put Takes
+    This : State_Machine
+    Val  : Unsigned_32
+Implements
+    SM_Put(This.Unit, This.Sm, Val)
+End Put
+
+Block Get Takes
+    This : State_Machine
+Produces Unsigned_32
+Implements
+    Give SM_Get(This.Unit, This.Sm)
+End Get
+
+Block Is_TX_Full Takes
+    This : State_Machine
+Produces Boolean
+Implements
+    Give (RP2040.Reg_Read(Base(This.Unit) + 0x004) & (1 LSL (16 + This.Sm))) != 0
+End Is_TX_Full
+
+Block Is_RX_Empty Takes
+    This : State_Machine
+Produces Boolean
+Implements
+    Give (RP2040.Reg_Read(Base(This.Unit) + 0x004) & (1 LSL (8 + This.Sm))) != 0
+End Is_RX_Empty
+

@@ -6,14 +6,20 @@ Declares
     Tick : Unsigned_32 = 0
     Chip : Unsigned_32 = 0
 Implements
-    Gpio.Init_Output(LED_PIN)
+    LED_PIN.Init_Output()
     Chip = System.Chip_ID()
 
     Time.Sleep_MS(1000)
     Print("Loom-Pico Blinky_USB booted! Chip ID: 0x<Chip:x>\n")
 
+    LED_PIN.High()
+    Time.Sleep_MS(250)
+    LED_PIN.Low()
+    Time.Sleep_MS(250)
+    LED_PIN.Write(True)
+
     Loop
-        LED_PIN.Toggle
+        LED_PIN.Toggle()
         Tick = Tick + 1
         If Usb_Cdc.Is_Configured()
             Print("Blink tick=<Tick>\n")

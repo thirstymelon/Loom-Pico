@@ -157,3 +157,18 @@ Implements
         I = I + 1
     End Loop
 End Write_Str
+
+Block Deinit Takes
+    This : Uart_Device
+Declares
+    Uart_Addr : Unsigned_32
+Implements
+    Uart_Addr = Base(This.Port_Id)
+    RP2040.Reg_Write(Uart_Addr + 0x30, 0)
+End Deinit
+
+Block Global
+    Declares
+        UART_0 : Constant Uart_Device = Uart_Device { Port_Id : Uart_Port.UART0 }
+        UART_1 : Constant Uart_Device = Uart_Device { Port_Id : Uart_Port.UART1 }
+End Global

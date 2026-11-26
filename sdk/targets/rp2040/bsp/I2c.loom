@@ -213,3 +213,18 @@ Implements
     End Loop
     Give (RP2040.Reg_Read(I2c_Addr + 0x10) & 0xFF) as Unsigned_8
 End Read_Reg
+
+Block Deinit Takes
+    This : I2c_Device
+Declares
+    I2c_Addr : Unsigned_32
+Implements
+    I2c_Addr = Base(This.Port_Id)
+    RP2040.Reg_Write(I2c_Addr + 0x6C, 0)
+End Deinit
+
+Block Global
+    Declares
+        I2C_0 : Constant I2c_Device = I2c_Device { Port_Id : I2c_Port.I2C0 }
+        I2C_1 : Constant I2c_Device = I2c_Device { Port_Id : I2c_Port.I2C1 }
+End Global

@@ -159,3 +159,34 @@ Implements
     End Loop
     Give (RP2040.Reg_Read(Spi_Addr + 0x08) & 0xFF) as Unsigned_8
 End Transfer_Byte
+
+Block Write_Byte Takes
+    This    : Spi_Device
+    Tx_Byte : Unsigned_8
+Declares
+    _ : Unsigned_8
+Implements
+    _ = Transfer_Byte(This, Tx_Byte)
+End Write_Byte
+
+Block Read_Byte Takes
+    This : Spi_Device
+Produces Unsigned_8
+Implements
+    Give Transfer_Byte(This, 0)
+End Read_Byte
+
+Block Deinit Takes
+    This : Spi_Device
+Declares
+    Spi_Addr : Unsigned_32
+Implements
+    Spi_Addr = Base(This.Port_Id)
+    RP2040.Reg_Write(Spi_Addr + 0x04, 0)
+End Deinit
+
+Block Global
+    Declares
+        SPI_0 : Constant Spi_Device = Spi_Device { Port_Id : Spi_Port.SPI0 }
+        SPI_1 : Constant Spi_Device = Spi_Device { Port_Id : Spi_Port.SPI1 }
+End Global
