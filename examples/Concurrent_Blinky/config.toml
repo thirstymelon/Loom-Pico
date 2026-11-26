@@ -1,0 +1,16 @@
+[project]
+name = "Concurrent_Blinky"
+version = "1.4.0"
+
+[build]
+main = "src/main.loom"
+sources = ["src/*.loom"]
+target-dir = "target"
+executable = "Concurrent_Blinky"
+target = "thumbv6m-none-eabi"
+cpu = "cortex-m0plus"
+baremetal = true
+uf2-output = true
+
+[toolchain]
+name = "rp2040"

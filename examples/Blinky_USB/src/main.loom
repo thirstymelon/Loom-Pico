@@ -1,0 +1,23 @@
+Module Main
+
+Block Main
+Declares
+    LED_PIN : Constant Gpio.Pin = Gpio.PICO_LED_PIN
+    Tick : Unsigned_32 = 0
+    Chip : Unsigned_32 = 0
+Implements
+    Gpio.Init_Output(LED_PIN)
+    Chip = System.Chip_ID()
+
+    Time.Sleep_MS(1000)
+    Print("Loom-Pico Blinky_USB booted! Chip ID: 0x<Chip:x>\n")
+
+    Loop
+        LED_PIN.Toggle
+        Tick = Tick + 1
+        If Usb_Cdc.Is_Configured()
+            Print("Blink tick=<Tick>\n")
+        End If
+        Time.Sleep_MS(500)
+    End Loop
+End Main

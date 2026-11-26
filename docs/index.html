@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#0d1117] text-[#c9d1d9] antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loom RP2040 Developer Documentation &amp; API Reference</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #090d13;
+      --bg-secondary: #0d1117;
+      --bg-tertiary: #161b22;
+      --border-color: #30363d;
+      --accent-color: #d97706;
+      --accent-dim: #b45309;
+      --text-muted: #8b949e;
+      --code-bg: #04070b;
+      --amber-accent: #f59e0b;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: #e6edf3;
+    }
+    pre, code, .font-mono {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    [role="tab"] {
+      position: relative;
+      transition: color 0.15s ease;
+    }
+    [aria-selected="true"] {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+    [aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 -1px 0;
+      border-block-end: 2px solid #d97706;
+    }
+    .copy-tip {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateY(4px);
+    }
+    .copy-btn[data-copied] + .copy-tip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tok-kw { color: #ff7b72; font-weight: 600; }
+    .tok-type { color: #79c0ff; }
+    .tok-fn { color: #d2a8ff; }
+    .tok-str { color: #a5d6ff; }
+    .tok-num { color: #f2cc60; }
+    .tok-com { color: #8b949e; font-style: italic; }
+    .tok-op { color: #ff7b72; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d13; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col">
+
+  <header class="border-b border-[#30363d] bg-[#0d1117] sticky top-0 z-40 px-4 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded bg-[#161b22] border border-[#d97706]/40 flex items-center justify-center text-[#f59e0b] font-mono font-bold text-sm">
+        LM
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-base text-white tracking-tight">Loom RP2040</span>
+          <span class="text-xs px-2 py-0.5 rounded border border-[#30363d] bg-[#161b22] text-[#f59e0b] font-mono">v1.4.0</span>
+          <span class="text-xs px-2 py-0.5 rounded border border-[#d97706]/40 bg-[#78350f]/30 text-[#fbbf24] font-mono">Silicon Native</span>
+        </div>
+        <p class="text-xs text-[#8b949e]">Exhaustive Developer Documentation, Toolchain &amp; Hardware Reference</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="relative w-64 md:w-80">
+        <input id="apiSearch" type="text" placeholder="Filter APIs or modules (e.g. Pio, Sio, Gpio)..."
+               class="w-full bg-[#161b22] border border-[#30363d] rounded px-3 py-1.5 text-xs text-white placeholder-[#8b949e] focus:outline-none focus:border-[#d97706] font-mono">
+      </div>
+      <a href="https://github.com" target="_blank" rel="noreferrer" class="text-xs px-3 py-1.5 rounded border border-[#30363d] bg-[#161b22] hover:bg-[#21262d] text-[#c9d1d9] transition">
+        Repository
+      </a>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <aside class="w-72 border-r border-[#30363d] bg-[#0d1117] flex flex-col shrink-0 overflow-y-auto p-4 space-y-6 text-sm">
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8b949e] mb-2 px-2">Core Concepts</h3>
+        <ul class="space-y-1 font-mono text-xs">
+          <li><a href="#overview" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">01. Silicon Architecture</a></li>
+          <li><a href="#quickstart" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">02. Quickstart &amp; Blinky</a></li>
+          <li><a href="#concurrency" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">03. Dual-Stack Concurrency</a></li>
+          <li><a href="#interrupts" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">04. SRAM VTOR &amp; Interrupts</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8b949e] mb-2 px-2">Hardware Coprocessors</h3>
+        <ul class="space-y-1 font-mono text-xs">
+          <li><a href="#mod-pio" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Pio (State Machines)</a></li>
+          <li><a href="#mod-sio" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Sio (Divider &amp; FIFOs)</a></li>
+          <li><a href="#mod-interp" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Interp (Interpolators)</a></li>
+          <li><a href="#mod-dma" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Dma (Autonomous Direct Bus)</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8b949e] mb-2 px-2">Peripherals &amp; Comm</h3>
+        <ul class="space-y-1 font-mono text-xs">
+          <li><a href="#mod-gpio" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Gpio (Pin Control)</a></li>
+          <li><a href="#mod-uart" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Uart (Serial Console)</a></li>
+          <li><a href="#mod-spi" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Spi (High Speed Bus)</a></li>
+          <li><a href="#mod-i2c" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">I2c (Sensor Wire)</a></li>
+          <li><a href="#mod-adc" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Adc (Analog Input)</a></li>
+          <li><a href="#mod-pwm" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Pwm (Pulse Modulation)</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[#8b949e] mb-2 px-2">System &amp; Real-Time</h3>
+        <ul class="space-y-1 font-mono text-xs">
+          <li><a href="#mod-system" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">System (Sleep &amp; Bootsel)</a></li>
+          <li><a href="#mod-watchdog" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Watchdog (Hardware Safety)</a></li>
+          <li><a href="#mod-time" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Time &amp; Clock</a></li>
+          <li><a href="#mod-sync" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Sync (Hardware Mutex &amp; SIO Spinlocks)</a></li>
+          <li><a href="#mod-crash" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Crash (Hardware Diagnostic Log)</a></li>
+          <li><a href="#mod-usbcdc" class="block px-2 py-1.5 rounded text-[#c9d1d9] hover:bg-[#161b22] hover:text-[#f59e0b]">Usb_Cdc (Virtual Comm Port)</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto px-6 py-8 lg:px-12 space-y-16 max-w-5xl">
+
+      <section id="overview" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Pillar 01</span>
+          <h1 class="text-3xl font-bold tracking-tight text-white mt-1">Loom RP2040 Architecture</h1>
+          <p class="text-sm text-[#8b949e] mt-2 leading-relaxed">
+            Loom runs bare-metal on the Raspberry Pi RP2040. It replaces runtime C libraries and third-party RTOS kernels with language-level concurrency, MPU task sandboxing, and direct silicon coprocessor bindings.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded border border-[#30363d] bg-[#161b22]">
+            <div class="text-xs font-mono text-[#f59e0b] font-bold">Dual-Stack Sandboxing</div>
+            <p class="text-xs text-[#8b949e] mt-1">Tasks run on PSP (Process Stack Pointer) in Unprivileged Mode. System services &amp; ISRs run on MSP in Privileged Handler Mode.</p>
+          </div>
+          <div class="p-4 rounded border border-[#30363d] bg-[#161b22]">
+            <div class="text-xs font-mono text-[#f59e0b] font-bold">Zero-Jitter SRAM VTOR</div>
+            <p class="text-xs text-[#8b949e] mt-1">Vector Table is relocated to Scratchpad 0 (<code class="text-white">0x20040000</code>). Interrupts dispatch in exactly 12 cycles without flash XIP cache penalties.</p>
+          </div>
+          <div class="p-4 rounded border border-[#30363d] bg-[#161b22]">
+            <div class="text-xs font-mono text-[#f59e0b] font-bold">Hardware Coprocessors</div>
+            <p class="text-xs text-[#8b949e] mt-1">Loom LLVM backend emits direct SIO hardware divider opcodes (8 cycles) and provides first-class syntax for PIO State Machines.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="quickstart" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Pillar 02</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Quickstart &amp; Blinky in 5 Lines</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Compile and flash a bare-metal binary directly. Loom generates startup code, memory maps, and vector tables automatically.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">examples/Blinky.loom</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-blinky" aria-label="Copy Blinky code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-blinky"><span class="tok-kw">Module</span> Blinky
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Gpio
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Time
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-kw">Var</span> Led : Pin = Gpio.Init_Output(25)
+    <span class="tok-kw">Loop</span>
+        Led.Toggle()
+        Time.Delay_MS(500)
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="concurrency" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Pillar 03</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Dual-Stack Concurrency &amp; MPU Sandboxing</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            The compiler enforces privilege separation at call sites. User tasks execute in unprivileged Thread mode on PSP; kernel drivers run with full hardware access on MSP.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Dual-Stack Privilege Syntax</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-concurrency" aria-label="Copy concurrency code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-concurrency"><span class="tok-kw">Module</span> ConcurrencyDemo
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Thread
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Gpio
+
+<span class="tok-kw">Block</span> Sensor_Worker()
+    <span class="tok-com">-- Executes on PSP (Process Stack Pointer) in Unprivileged Mode</span>
+    <span class="tok-kw">Loop</span>
+        Thread.Sleep_MS(100)
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Sensor_Worker
+
+<span class="tok-kw">Block</span> Hardware_Driver()
+    <span class="tok-com">-- Executes on MSP (Main Stack Pointer) with Full Privileged Hardware Access</span>
+    <span class="tok-kw">Loop</span>
+        Thread.Sleep_MS(10)
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Hardware_Driver
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- Spawn unprivileged task on Core 0</span>
+    <span class="tok-kw">Spawn</span> Sensor_Worker()
+
+    <span class="tok-com">-- Spawn privileged hardware driver</span>
+    <span class="tok-kw">Spawn Privileged</span> Hardware_Driver()
+
+    <span class="tok-com">-- Spawn task pinned to Core 1</span>
+    <span class="tok-kw">Spawn</span> Sensor_Worker() <span class="tok-kw">On</span> Core(1)
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="interrupts" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Pillar 04</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Deterministic SRAM VTOR &amp; Interrupt Handling</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            During bootup, the Loom startup sequence clones the vector table from read-only Flash into RP2040 Scratchpad RAM 0 (<code class="text-white">0x20040000</code>).
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Zero-Jitter Handler Syntax</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-interrupt" aria-label="Copy interrupt code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-interrupt"><span class="tok-kw">Module</span> InterruptDemo
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Pio
+
+<span class="tok-com">-- Zero-latency PIO interrupt handler bound directly into SRAM VTOR</span>
+<span class="tok-kw">Block Handler Pio_Interrupt</span>(0, 0)
+    <span class="tok-com">-- Clear PIO0 IRQ 0</span>
+    Pio.IRQ_Clear(0, 0)
+<span class="tok-kw">End</span> Pio_Interrupt
+
+<span class="tok-com">-- Hard real-time periodic block executed with bounded jitter</span>
+<span class="tok-kw">Block Periodic</span>(Interval: 1000, Max_Jitter: 5)
+    <span class="tok-com">-- Sample telemetry precisely every 1000 microseconds (&plusmn;5us max)</span>
+<span class="tok-kw">End</span> Periodic</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-pio" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Hardware Coprocessor</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Pio: Programmable I/O State Machines</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            The RP2040 integrates two PIO units with four state machines each. These eight hardware engines execute bit-banging routines independently of the CPU at up to 133 MHz.
+          </p>
+        </div>
+
+        <div class="border border-[#30363d] rounded-lg p-4 bg-[#161b22] space-y-3">
+          <div class="text-xs font-bold text-white font-mono">Module APIs</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-[#8b949e]">
+            <div><span class="text-[#f59e0b]">Init</span>(Unit : Nat_32)</div>
+            <div><span class="text-[#f59e0b]">SM_Init_Default</span>(Unit, SM, Offset, Pin)</div>
+            <div><span class="text-[#f59e0b]">SM_Set_FIFO_Join</span>(Unit, SM, Join_Mode)</div>
+            <div><span class="text-[#f59e0b]">SM_Set_Shift</span>(Unit, SM, In_Right, Auto_Push, Threshold)</div>
+            <div><span class="text-[#f59e0b]">SM_Set_Pin_Mappings</span>(Unit, SM, Out_Base, Out_Count, Set_Base, Set_Count)</div>
+            <div><span class="text-[#f59e0b]">SM_Put</span>(Unit, SM, Data) / <span class="text-[#f59e0b]">SM_Get</span>(Unit, SM)</div>
+            <div><span class="text-[#f59e0b]">IRQ_Set_Enabled</span>(Unit, Irq_Idx, Enabled)</div>
+            <div><span class="text-[#f59e0b]">IRQ_Clear</span>(Unit, Irq_Idx)</div>
+          </div>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Complete PIO Example</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-pio" aria-label="Copy PIO code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-pio"><span class="tok-kw">Module</span> PioExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Pio
+
+<span class="tok-com">-- Define assembly program inline</span>
+<span class="tok-kw">Pio_Program</span> SquareWave
+    <span class="tok-kw">Set</span>(Pins, 1) [1]
+    <span class="tok-kw">Set</span>(Pins, 0) [1]
+<span class="tok-kw">End</span> SquareWave
+
+<span class="tok-kw">Block</span> Main()
+    Pio.Init(0)
+
+    <span class="tok-com">-- Join RX/TX FIFO for 8-word deep TX buffer</span>
+    Pio.SM_Set_FIFO_Join(0, 0, FIFO_Join.Join_TX)
+
+    <span class="tok-com">-- Configure shift register and autopush at 32-bit threshold</span>
+    Pio.SM_Set_Shift(0, 0, Shift_Dir.Right, <span class="tok-kw">True</span>, 32)
+
+    <span class="tok-com">-- Configure pin mappings</span>
+    Pio.SM_Set_Pin_Mappings(0, 0, 16, 1, 16, 1)
+
+    <span class="tok-com">-- Enable hardware interrupts</span>
+    Pio.IRQ_Set_Enabled(0, 0, <span class="tok-kw">True</span>)
+
+    <span class="tok-com">-- Send 32-bit packet directly to state machine FIFO</span>
+    Pio.SM_Put(0, 0, 0xAAAAAAAA)
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-sio" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Hardware Coprocessor</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Sio: Hardware Divider &amp; Inter-Core FIFOs</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            The Single-Cycle I/O (SIO) block contains an 8-cycle 32-bit hardware divider and an 8-entry bidirectional inter-core FIFO.
+          </p>
+        </div>
+
+        <div class="border border-[#30363d] rounded-lg p-4 bg-[#161b22] space-y-3">
+          <div class="text-xs font-bold text-white font-mono">Module APIs</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-[#8b949e]">
+            <div><span class="text-[#f59e0b]">Automatic  and </span> (8-cycle codegen)</div>
+            <div><span class="text-[#f59e0b]">Div_Start_Unsigned</span>(Dividend, Divisor)</div>
+            <div><span class="text-[#f59e0b]">Div_Result</span>() / <span class="text-[#f59e0b]">Div_Remainder</span>()</div>
+            <div><span class="text-[#f59e0b]">FIFO_Push</span>(Data : Nat_32)</div>
+            <div><span class="text-[#f59e0b]">FIFO_Pop</span>() -&gt; Nat_32</div>
+            <div><span class="text-[#f59e0b]">FIFO_Has_Data</span>() -&gt; Bool</div>
+            <div><span class="text-[#f59e0b]">FIFO_Is_Ready</span>() -&gt; Bool</div>
+            <div><span class="text-[#f59e0b]">FIFO_Drain</span>()</div>
+          </div>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Hardware Divider &amp; Inter-Core FIFO</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-sio" aria-label="Copy SIO code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-sio"><span class="tok-kw">Module</span> SioExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Sio
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- 1. Automatic Hardware Division (LLVM lowers directly to SIO registers)</span>
+    <span class="tok-kw">Var</span> A : Nat_32 = 1000000
+    <span class="tok-kw">Var</span> B : Nat_32 = 7
+    <span class="tok-kw">Var</span> Quotient : Nat_32 = A / B    <span class="tok-com">-- Exactly 8 cycles!</span>
+    <span class="tok-kw">Var</span> Remainder : Nat_32 = A % B   <span class="tok-com">-- Read instantly</span>
+
+    <span class="tok-com">-- 2. Non-blocking Division Pipelining</span>
+    Sio.Div_Start_Unsigned(0x12345678, 42)
+    <span class="tok-com">-- Do other CPU instructions here while SIO divides in silicon</span>
+    <span class="tok-kw">Var</span> Result : Nat_32 = Sio.Div_Result()
+
+    <span class="tok-com">-- 3. High-throughput Inter-Core Hardware FIFO</span>
+    <span class="tok-kw">If</span> Sio.FIFO_Is_Ready()
+        Sio.FIFO_Push(0xCAFEBABE)
+    <span class="tok-kw">End</span>
+
+    <span class="tok-kw">If</span> Sio.FIFO_Has_Data()
+        <span class="tok-kw">Var</span> Msg : Nat_32 = Sio.FIFO_Pop()
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-interp" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Hardware Coprocessor</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Interp: Hardware Interpolator</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Each core connects directly to two interpolation lanes. They evaluate linear interpolation, color blending, fixed-point scaling, and table lookups in 1 to 2 cycles.
+          </p>
+        </div>
+
+        <div class="border border-[#30363d] rounded-lg p-4 bg-[#161b22] space-y-3">
+          <div class="text-xs font-bold text-white font-mono">Module APIs</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-[#8b949e]">
+            <div><span class="text-[#f59e0b]">Init</span>(Interp_Index : Nat_32)</div>
+            <div><span class="text-[#f59e0b]">Blend</span>(A, B, Alpha : Nat_32) -&gt; Nat_32</div>
+            <div><span class="text-[#f59e0b]">Linear_Interp</span>(V0, V1, T : Nat_32) -&gt; Nat_32</div>
+            <div><span class="text-[#f59e0b]">Table_Lookup</span>(Base, Index, Stride) -&gt; Nat_32</div>
+            <div><span class="text-[#f59e0b]">Fixed_Point_Mul</span>(A, B, Shift) -&gt; Nat_32</div>
+          </div>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Interpolation Example</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-interp" aria-label="Copy Interp code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-interp"><span class="tok-kw">Module</span> InterpExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Interp
+
+<span class="tok-kw">Block</span> Main()
+    Interp.Init(0)
+
+    <span class="tok-com">-- Hardware alpha-blend between two 8-bit channels in 1 cycle</span>
+    <span class="tok-kw">Var</span> Color : Nat_32 = Interp.Blend(0x00, 0xFF, 128)
+
+    <span class="tok-com">-- Fixed-point linear interpolation for audio / DSP</span>
+    <span class="tok-kw">Var</span> Sample : Nat_32 = Interp.Linear_Interp(100, 500, 64)
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-dma" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Hardware Coprocessor</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Dma: Direct Memory Access Controller</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Twelve autonomous DMA channels transfer data across RAM and peripheral FIFOs without stalling CPU execution.
+          </p>
+        </div>
+
+        <div class="border border-[#30363d] rounded-lg p-4 bg-[#161b22] space-y-3">
+          <div class="text-xs font-bold text-white font-mono">Module APIs</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-[#8b949e]">
+            <div><span class="text-[#f59e0b]">Init_Channel</span>(Channel : Nat_32)</div>
+            <div><span class="text-[#f59e0b]">Transmit</span>(Channel, DREQ, Src, Count)</div>
+            <div><span class="text-[#f59e0b]">Receive</span>(Channel, DREQ, Dst, Count)</div>
+            <div><span class="text-[#f59e0b]">Transfer_32</span>(Channel, Src, Dst, Count)</div>
+            <div><span class="text-[#f59e0b]">Chain</span>(Channel, Next_Channel)</div>
+            <div><span class="text-[#f59e0b]">Is_Busy</span>(Channel) -&gt; Bool</div>
+            <div><span class="text-[#f59e0b]">Wait_Complete</span>(Channel)</div>
+          </div>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Autonomous DMA Transfer</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-dma" aria-label="Copy DMA code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-dma"><span class="tok-kw">Module</span> DmaExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Dma
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-kw">Var</span> Src_Buffer : [1024]Nat_32
+    <span class="tok-kw">Var</span> Dst_Buffer : [1024]Nat_32
+
+    <span class="tok-com">-- Fire off memory transfer on DMA Channel 0</span>
+    Dma.Transfer_32(0, Src_Buffer, Dst_Buffer, 1024)
+
+    <span class="tok-com">-- Continue executing CPU tasks while DMA controller transfers data</span>
+    <span class="tok-kw">While</span> Dma.Is_Busy(0)
+        <span class="tok-com">-- Autonomous background streaming</span>
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-gpio" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Peripheral</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Gpio: General Purpose Input/Output</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Pin initialization, high-speed atomic toggling, drive strength, pull-up/pull-down resistor controls, and multiplexer routing.
+          </p>
+        </div>
+
+        <div class="border border-[#30363d] rounded-lg p-4 bg-[#161b22] space-y-3">
+          <div class="text-xs font-bold text-white font-mono">Module APIs</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-[#8b949e]">
+            <div><span class="text-[#f59e0b]">Init_Output</span>(Pin_Num : Nat_32) -&gt; Pin</div>
+            <div><span class="text-[#f59e0b]">Init_Input</span>(Pin_Num : Nat_32) -&gt; Pin</div>
+            <div><span class="text-[#f59e0b]">Pin.High</span>() / <span class="text-[#f59e0b]">Pin.Low</span>()</div>
+            <div><span class="text-[#f59e0b]">Pin.Toggle</span>()</div>
+            <div><span class="text-[#f59e0b]">Pin.Read</span>() -&gt; Bool</div>
+            <div><span class="text-[#f59e0b]">Set_Pulls</span>(Pin_Num, Up: Bool, Down: Bool)</div>
+            <div><span class="text-[#f59e0b]">Set_Function</span>(Pin_Num, Function_Id)</div>
+          </div>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">GPIO Input &amp; Output</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-gpio" aria-label="Copy GPIO code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-gpio"><span class="tok-kw">Module</span> GpioExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Gpio
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-kw">Var</span> Button : Pin = Gpio.Init_Input(14)
+    Gpio.Set_Pulls(14, <span class="tok-kw">True</span>, <span class="tok-kw">False</span>) <span class="tok-com">-- Enable internal pull-up</span>
+
+    <span class="tok-kw">Var</span> Led : Pin = Gpio.Init_Output(25)
+
+    <span class="tok-kw">Loop</span>
+        <span class="tok-kw">If</span> Not Button.Read()
+            Led.High()
+        <span class="tok-kw">Else</span>
+            Led.Low()
+        <span class="tok-kw">End</span>
+    <span class="tok-kw">End</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-uart" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Communication Peripherals</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Uart, Spi &amp; I2c Busses</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Hardware bus interfaces configured for standard embedded sensor protocols and debugging consoles.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Hardware Communication Busses</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-busses" aria-label="Copy busses code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-busses"><span class="tok-kw">Module</span> CommExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Uart
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Spi
+<span class="tok-kw">Import</span> Target.RP2040.BSP.I2c
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- UART0 initialized at 115200 baud (TX=0, RX=1)</span>
+    Uart.Init(0, 115200, 0, 1)
+    Uart.Write_Str(0, <span class="tok-str">"Loom RP2040 Serial Active
+"</span>)
+
+    <span class="tok-com">-- SPI0 initialized at 10 MHz</span>
+    Spi.Init(0, 10000000, 18, 19, 16)
+    <span class="tok-kw">Var</span> Rx_Byte : Nat_8 = Spi.Transmit(0, 0x9F) <span class="tok-com">-- Read JEDEC ID</span>
+
+    <span class="tok-com">-- I2C0 initialized at 400 kHz Fast-Mode (SDA=4, SCL=5)</span>
+    I2c.Init(0, 400000, 4, 5)
+    <span class="tok-kw">Var</span> Sensor_Id : Nat_8 = I2c.Read_Reg(0, 0x68, 0x75) <span class="tok-com">-- WHO_AM_I</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-adc" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Analog &amp; Pulse</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Adc &amp; Pwm</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            12-bit 500kS/s analog-to-digital converter (with internal temperature sensor) and 16-channel pulse-width modulation slice engines.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">ADC &amp; PWM Example</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-adc" aria-label="Copy ADC code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-adc"><span class="tok-kw">Module</span> AnalogExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Adc
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Pwm
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- Read onboard temperature sensor (ADC Channel 4)</span>
+    Adc.Init()
+    Adc.Select_Input(4)
+    <span class="tok-kw">Var</span> Raw_Temp : Nat_16 = Adc.Read()
+
+    <span class="tok-com">-- Drive a servo or LED on GPIO 15 via PWM Slice</span>
+    Pwm.Init(15, 50)          <span class="tok-com">-- 50 Hz PWM frequency</span>
+    Pwm.Set_Duty_Cycle(15, 75) <span class="tok-com">-- 7.5% duty pulse</span>
+    Pwm.Enable(15)
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-system" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">System Control</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">System &amp; Sleep-On-Exit Control</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Controls low-power Sleep-On-Exit modes, software restarts, and programmatic jumps into USB BOOTSEL mode.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">System Power &amp; Reboot</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-system" aria-label="Copy system code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-system"><span class="tok-kw">Module</span> SystemExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.System
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- Put CPU to sleep immediately whenever interrupt handlers exit (Ultra-low power)</span>
+    System.Set_Sleep_On_Exit(<span class="tok-kw">True</span>)
+
+    <span class="tok-com">-- Trigger software reboot</span>
+    <span class="tok-com">-- System.Reboot_Normal()</span>
+
+    <span class="tok-com">-- Reboot directly into USB BOOTSEL mode without pressing hardware buttons</span>
+    <span class="tok-com">-- System.Reboot_Bootsel()</span>
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+      <section id="mod-crash" class="space-y-4">
+        <div class="border-b border-[#30363d] pb-4">
+          <span class="text-xs font-mono text-[#f59e0b] uppercase tracking-wider font-semibold">Reliability &amp; Safety</span>
+          <h2 class="text-2xl font-bold tracking-tight text-white mt-1">Watchdog, Sync &amp; Hardware Crash Diagnostics</h2>
+          <p class="text-sm text-[#8b949e] mt-1">
+            Hardware spinlocks, recursive mutexes, watchdog timer configuration, and crash dumps stored across reboot in non-volatile scratch registers.
+          </p>
+        </div>
+
+        <div class="relative rounded-lg border border-[#30363d] bg-[#04070b] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+            <span class="text-xs font-mono text-[#8b949e]">Safety &amp; Diagnostics Example</span>
+            <div class="relative flex items-center">
+              <button type="button" class="copy-btn px-2 py-1 text-xs font-mono rounded bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] text-white flex items-center space-x-1" data-target="code-crash" aria-label="Copy crash code">
+                <span>Copy</span>
+              </button>
+              <span class="copy-tip absolute right-12 text-xs font-mono px-2 py-0.5 rounded bg-[#d97706] text-white" role="status">Copied</span>
+            </div>
+          </div>
+          <pre class="p-4 text-xs font-mono overflow-x-auto leading-relaxed"><code id="code-crash"><span class="tok-kw">Module</span> SafetyExample
+
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Watchdog
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Crash
+<span class="tok-kw">Import</span> Target.RP2040.BSP.Sync
+
+<span class="tok-kw">Block</span> Main()
+    <span class="tok-com">-- 1. Check if previous reboot was caused by an unhandled panic/hardfault</span>
+    <span class="tok-kw">If</span> Crash.Did_Crash()
+        Crash.Print_Crash_Report()
+        <span class="tok-kw">Var</span> Fault_Address : Nat_32 = Crash.Get_Last_PC()
+    <span class="tok-kw">End</span>
+
+    <span class="tok-com">-- 2. Arm hardware watchdog with 2000 ms timeout</span>
+    Watchdog.Enable(2000)
+
+    <span class="tok-com">-- 3. Hardware spinlock synchronization across Core 0 and Core 1</span>
+    <span class="tok-kw">Var</span> Lock : Mutex = Sync.Create_Mutex()
+    Lock.Acquire()
+    <span class="tok-com">-- Critical Section</span>
+    Lock.Release()
+
+    <span class="tok-com">-- 4. Feed watchdog in main supervisory loop</span>
+    Watchdog.Feed()
+<span class="tok-kw">End</span> Main</code></pre>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      const targetId = btn.getAttribute("data-target");
+      const targetEl = document.getElementById(targetId);
+      if (!targetEl) return;
+      try {
+        await navigator.clipboard.writeText(targetEl.innerText.trim());
+        btn.setAttribute("data-copied", "true");
+        setTimeout(() => {
+          btn.removeAttribute("data-copied");
+        }, 1500);
+      } catch (err) {
+        console.error("Copy failed", err);
+      }
+    });
+
+    const searchInput = document.getElementById("apiSearch");
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const sections = document.querySelectorAll("main section");
+        sections.forEach(sec => {
+          if (!query) {
+            sec.style.display = "";
+            return;
+          }
+          const text = sec.innerText.toLowerCase();
+          sec.style.display = text.includes(query) ? "" : "none";
+        });
+      });
+    }
+  </script>
+</body>
+</html>

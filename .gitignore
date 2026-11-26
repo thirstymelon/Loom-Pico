@@ -1,0 +1,13 @@
+build/
+bin/
+target/
+.loom/
+toolchain/bin/
+*.o
+*.elf
+*.bin
+*.uf2
+*.dSYM
+__pycache__/
+*.pyc
+.DS_Store

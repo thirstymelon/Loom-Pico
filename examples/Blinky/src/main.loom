@@ -1,0 +1,13 @@
+Module Main
+
+Block Main
+Declares
+    LED_PIN : Constant Gpio.Pin = 24
+Implements
+    Gpio.Init_Output(LED_PIN)
+
+    Loop
+        LED_PIN.Toggle
+        Time.Sleep_MS(500)
+    End Loop
+End Main

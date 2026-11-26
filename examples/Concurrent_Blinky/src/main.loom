@@ -1,0 +1,49 @@
+Module Main
+
+Block Global
+Declares
+    LED_PIN : Constant Gpio.Pin = 25
+    Lock : Sync.Mutex
+    Counter : Unsigned_32 = 0
+End Global
+
+Block Task_Heartbeat
+Implements
+    Loop
+        LED_PIN.Toggle
+        Lock.Acquire
+        Counter = Counter + 1
+        Lock.Unlock
+        Time.Sleep_MS(200)
+    End Loop
+End Task_Heartbeat
+
+Block Task_Telemetry
+Declares
+    Count_Copy : Unsigned_32 = 0
+Implements
+    Loop
+        Time.Sleep_MS(1000)
+        Lock.Acquire
+        Count_Copy = Counter
+        Lock.Unlock
+        If Usb_Cdc.Is_Configured()
+            Print("Dual-Core SMP Heartbeat: counter=<Count_Copy>\n")
+        End If
+    End Loop
+End Task_Telemetry
+
+Block Main
+Implements
+    Gpio.Init_Output(LED_PIN)
+    Lock.Init
+
+    Print("=== Loom Dual-Core SMP Blinky Starting ===\n")
+
+    Spawn Task_Heartbeat()
+    Spawn Task_Telemetry()
+
+    Loop
+        Thread.Yield()
+    End Loop
+End Main
